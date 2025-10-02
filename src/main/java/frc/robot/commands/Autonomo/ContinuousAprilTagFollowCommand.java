@@ -33,8 +33,8 @@ public class ContinuousAprilTagFollowCommand extends Command {
   // Target distance to maintain from tag (in meters)
   private static final double DEFAULT_TARGET_DISTANCE = 1.0;
   
-  // Search rotation speed when no target is found
-  private static final double SEARCH_ROTATION_SPEED = 0.2;
+  // Search rotation speed when no target is found (no longer used)
+  // private static final double SEARCH_ROTATION_SPEED = 0.2;
   
   // Control variables
   private double targetDistance;
@@ -131,22 +131,12 @@ public class ContinuousAprilTagFollowCommand extends Command {
   
   /**
    * Handles the case when no target is detected.
+   * Ahora detiene siempre los motores y espera un AprilTag.
    */
   private void handleNoTarget() {
-    noTargetCounter++;
-    
-    if (noTargetCounter > MAX_NO_TARGET_COUNT) {
-      // Start searching after a delay without target
-      isSearching = true;
-      
-      // Rotate to search for targets
-      chasis.set_motors(SEARCH_ROTATION_SPEED, -SEARCH_ROTATION_SPEED);
-      
-      SmartDashboard.putString("Vision/Status", "Searching");
-    } else {
-      // Briefly maintain last control outputs
-      SmartDashboard.putString("Vision/Status", "Target Lost - Continuing");
-    }
+    // Detener motores y mostrar estado de espera
+    chasis.set_motors(0, 0);
+    SmartDashboard.putString("Vision/Status", "Waiting for AprilTag");
   }
 
   @Override
