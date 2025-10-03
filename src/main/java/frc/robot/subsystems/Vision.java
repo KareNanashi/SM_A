@@ -37,7 +37,7 @@ public class Vision extends SubsystemBase {
    * Creates a new Vision subsystem.
    */
   public Vision() {
-    camera = new PhotonCamera("photonvision_Port_1184_Output_MJPEG_Server");
+    camera = new PhotonCamera("photonvision");
     resetTargetData();
   }
   
