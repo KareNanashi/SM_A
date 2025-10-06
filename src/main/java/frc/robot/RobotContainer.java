@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-import frc.robot.commands.Autonomo.ContinuousAprilTagFollowCommand;
+import frc.robot.commands.Autonomo.AlignToAprilTagCommand;
 import frc.robot.commands.Chasis.ArcadeDriveCmd;
 import frc.robot.commands.Chasis.Drive;
 import frc.robot.commands.Chasis.RotarDerecha;
@@ -58,7 +58,7 @@ public class RobotContainer {
   private final DigitalInput uplimitswitch = new DigitalInput(1);
   
   // Autonomous commands
-  private final Command continuousAprilTagFollow = new ContinuousAprilTagFollowCommand(vision, chasis);
+  private final Command AlignToAprilTagCommand = new AlignToAprilTagCommand(vision, chasis);
   
   // Command selector for autonomous
   private final SendableChooser<Command> mChooser = new SendableChooser<>();
@@ -118,7 +118,7 @@ public class RobotContainer {
    */
   private void configureAutonomousOptions() {
     // Set continuous AprilTag following as the default and only autonomous option
-    mChooser.setDefaultOption("AprilTag Following", continuousAprilTagFollow);
+    mChooser.setDefaultOption("AprilTag Following", AlignToAprilTagCommand);
     
     // Publicar el chooser en SmartDashboard
     SmartDashboard.putData("Auto Mode", mChooser);
@@ -153,7 +153,7 @@ public class RobotContainer {
     
     // Add vision alignment button - change to continuous following for testing
     new JoystickButton(control_1, 3)
-        .whileTrue(new ContinuousAprilTagFollowCommand(vision, chasis));
+        .whileTrue(new AlignToAprilTagCommand(vision, chasis));
   }
   
   /**
