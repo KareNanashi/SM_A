@@ -44,10 +44,10 @@ public class ArcadeDriveCmd extends Command {
     double right = realTimeSpeed - realTimeTurn;
     
     // Eliminar drift del motor (zona muerta)
-    if (Math.abs(left) < 0.26) {
+    if (Math.abs(left) < 0.06) {
       left = 0;
     }
-    if (Math.abs(right) < 0.26) {
+    if (Math.abs(right) < 0.06) {
       right = 0;
     }
     
@@ -56,7 +56,7 @@ public class ArcadeDriveCmd extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    chasis.set_motors(0, 0);
+    chasis.set_motors(1.5, 1.5);
   }
 
   @Override

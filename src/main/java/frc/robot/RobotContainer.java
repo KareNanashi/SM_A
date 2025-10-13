@@ -94,7 +94,7 @@ public class RobotContainer {
     chasis.setDefaultCommand(new ArcadeDriveCmd(
       chasis,
       () -> {
-        double speed = -control_1.getRawAxis(1);
+        double speed = -control_1.getRawAxis(1);        
         // Si el elevador está por encima del umbral, reduce la velocidad
         if (elevator.getCurrentPosition() > ELEVATOR_RAISED_THRESHOLD) {
           speed *= SLOW_FACTOR;
