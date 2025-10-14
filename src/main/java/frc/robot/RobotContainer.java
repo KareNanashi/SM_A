@@ -137,15 +137,13 @@ public class RobotContainer {
     new JoystickButton(control_1, 3)
         .whileTrue(new AlignToAprilTagCommand(vision, chasis));
 
-        new JoystickButton(control_1, 1)
-        .whileTrue(new ElevatorCmd(elevator, 0.75)); // Subir
-    
+    new JoystickButton(control_1, 1)
+        .whileTrue(new ElevatorCmd(elevator, 0.75, downlimitswitch, uplimitswitch)); // Subir
+
     new JoystickButton(control_1, 2)
-        .whileTrue(new ElevatorCmd(elevator,-0.75)); // Bajar
+        .whileTrue(new ElevatorCmd(elevator, -0.75, downlimitswitch, uplimitswitch)); // Bajar
     
-        new JoystickButton(control_1, 5).onTrue(new ResetEncoders(elevator));    
-    
-    SmartDashboard.putBoolean("Elevator/Reset Encoder", false); // Botón en dashboard
+    new JoystickButton(control_1, 5).onTrue(new ResetEncoders(elevator));    
   }
   
   /**
