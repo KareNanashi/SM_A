@@ -31,46 +31,57 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and trigger mappings) should be declared here.
+ * ROBOT CONTAINER
+ * Aquí se declaran y conectan todos los subsistemas, comandos y controles del robot.
+ * Estructura principal:
+ * - Subsistemas: Chasis, Elevator, Vision.
+ * - Controles: Dos XboxController.
+ * - Limit switches: Para el elevador.
+ * - Comandos: ArcadeDrive, AlignToAprilTag, ElevatorCmd, ResetEncoders, entre otros.
+ * - SendableChooser: Para seleccionar el modo autónomo.
+ * - Métodos clave: configureDefaultCommands, configureAutonomousOptions, configureBindings.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
+  // Subsistemas principales
   private final Chasis chasis = new Chasis();
   private final Elevator elevator = new Elevator();
   private final Vision vision = new Vision();
+
+  // Controles (Xbox Controllers)
   private final XboxController control_1 = new XboxController(1);
   private final XboxController control_2 = new XboxController(0);
-  
-  // Limit switches
+
+  // Limit switches para el elevador
   private final DigitalInput downlimitswitch = new DigitalInput(0);
   private final DigitalInput uplimitswitch = new DigitalInput(1);
-  
-  // Autonomous commands
+
+  // Comando autónomo principal: seguir AprilTag
   private final Command AlignToAprilTagCommand = new AlignToAprilTagCommand(vision, chasis);
-  
-  // Command selector for autonomous
+
+  // Selector de comandos para autónomo
   private final SendableChooser<Command> mChooser = new SendableChooser<>();
-  
-  // Rate limiter for smooth driving
+
+  // SlewRateLimiter para suavizar aceleraciones del chasis
   private final SlewRateLimiter filter = new SlewRateLimiter(0.5);
-  
-  // Constants
-  private static final double ELEVATOR_RAISED_THRESHOLD = 100; // Velocity in base mesurements
-  private static final double SLOW_FACTOR = 0.5; // Slow factor meanwhile elevator is elevated
-  
+
+  // Constantes de operación
+  private static final double ELEVATOR_RAISED_THRESHOLD = 100; // Umbral de altura de elevador
+  private static final double SLOW_FACTOR = 0.5; // Reducción de velocidad si elevador está arriba
+
   /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
+   * Constructor: inicializa la estructura del robot.
+   * IMPORTANTE: Se deben llamar los métodos de configuración aquí.
    */
   public RobotContainer() {
-    
-    // Add CommandScheduler to SmartDashboard
+    configureDefaultCommands();
+    configureAutonomousOptions();
+    configureBindings();
+    // Puedes agregar aquí otros inicializadores si tienes subsistemas extra.
   }
-  
+
   /**
-   * Configure the default commands for subsystems.
+   * Configura los comandos por defecto de cada subsistema.
+   * - Chasis: ArcadeDriveCmd con lógica de reducción de velocidad si elevador está arriba.
    */
   private void configureDefaultCommands() {
     chasis.setDefaultCommand(new ArcadeDriveCmd(
@@ -91,43 +102,42 @@ public class RobotContainer {
         return turn*0.4;
       }
     ));
-    
-    
   }
-  
+
   /**
-   * Configure autonomous options for the sendable chooser.
+   * Configura las opciones disponibles para el modo autónomo.
+   * Actualmente, sólo hay una opción: seguir el AprilTag.
    */
   private void configureAutonomousOptions() {
-    // Set continuous AprilTag following as the default and only autonomous option
     mChooser.setDefaultOption("AprilTag Following", AlignToAprilTagCommand);
-    
-    // Publicar el chooser en SmartDashboard
     SmartDashboard.putData("Auto Mode", mChooser);
   }
 
-  private void configureBindings() {
-    // Controller 1 - Driver
-      // Add vision alignment button - change to continuous following for testing
-      new JoystickButton(control_1, 3)
-          .whileTrue(new AlignToAprilTagCommand(vision, chasis));
-  
-      new JoystickButton(control_1, 1)
-          .whileTrue(new ElevatorCmd(elevator, 0.75, downlimitswitch, uplimitswitch)); // Subir
-  
-      new JoystickButton(control_1, 2)
-          .whileTrue(new ElevatorCmd(elevator, -0.75, downlimitswitch, uplimitswitch)); // Bajar
-      
-      new JoystickButton(control_1, 5).onTrue(new ResetEncoders(elevator));    
-    }
-  
   /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
+   * Configura los bindings entre botones físicos y comandos.
+   * - Botón 3: alineación continua con AprilTag.
+   * - Botón 1: subir elevador (mientras se mantenga presionado).
+   * - Botón 2: bajar elevador (mientras se mantenga presionado).
+   * - Botón 5: reset encoder del elevador.
+   */
+  private void configureBindings() {
+    // Controlador 1 - Driver
+    new JoystickButton(control_1, 3)
+        .whileTrue(new AlignToAprilTagCommand(vision, chasis));
+
+    new JoystickButton(control_1, 1)
+        .whileTrue(new ElevatorCmd(elevator, 0.75, downlimitswitch, uplimitswitch)); // Subir
+
+    new JoystickButton(control_1, 2)
+        .whileTrue(new ElevatorCmd(elevator, -0.75, downlimitswitch, uplimitswitch)); // Bajar
+    
+    new JoystickButton(control_1, 5).onTrue(new ResetEncoders(elevator));    
+  }
+
+  /**
+   * Devuelve el comando autónomo seleccionado para ser ejecutado por el robot.
    */
   public Command getAutonomousCommand() {
-    // Return the selected command from the chooser
     return mChooser.getSelected();
   }
 }

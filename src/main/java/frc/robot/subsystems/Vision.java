@@ -17,33 +17,36 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
- * Vision subsystem using PhotonVision for AprilTag detection and tracking.
+ * SUBSISTEMA: VISIÓN
+ * Maneja detección y seguimiento de AprilTags usando PhotonVision.
+ * Proporciona información de posición, ángulo y ID de tag.
+ * Métodos clave:
+ * - periodic: Actualiza y publica datos de visión en el Dashboard.
+ * - getXAxis/getYAxis/getZAngle/getIDApriltag: Devuelven datos del target actual.
+ * - hasTarget: Indica si hay tag detectado.
+ * - isValidTag: Filtra tags de interés según IDs configurados.
  */
 public class Vision extends SubsystemBase {
-  // The PhotonVision camera
+  // Cámara PhotonVision configurada con nombre "photonvision"
   private final PhotonCamera camera;
   
-  // Target information
+  // Variables de posición y estado del target
   private double xAxis = 0.0;
   private double yAxis = 0.0;
   private double zAngle = 0.0;
   private int tagId = -1;
   private boolean hasTarget = false;
   
-  // For filtered targets
+  // Lista de IDs válidos para filtrar tags de interés
   private final List<Integer> validTagIds = List.of(1, 2, 6, 7, 8, 9, 10, 11, 12, 13, 17, 18, 19, 20, 21, 22);
   
-  /**
-   * Creates a new Vision subsystem.
-   */
+  /** Constructor: inicializa cámara y datos por defecto. */
   public Vision() {
     camera = new PhotonCamera("photonvision");
     resetTargetData();
   }
   
-  /**
-   * Reset all target data to default values.
-   */
+  /** Reinicia los datos del target detectado. */
   public void resetTargetData() {
     xAxis = 0.0;
     yAxis = 0.0;
@@ -52,6 +55,9 @@ public class Vision extends SubsystemBase {
     hasTarget = false;
   }
 
+  /**
+   * Se llama automáticamente cada ciclo: actualiza datos de visión y publica en Dashboard.
+   */
   @Override
   public void periodic() {
     updateVisionData();
@@ -59,7 +65,7 @@ public class Vision extends SubsystemBase {
   }
 
   /**
-   * Update vision data from the PhotonVision camera.
+   * Actualiza los datos de visión desde la PhotonCamera.
    */
   private void updateVisionData() {
     PhotonPipelineResult result = camera.getLatestResult();
@@ -67,7 +73,7 @@ public class Vision extends SubsystemBase {
     if (result.hasTargets()) {
       PhotonTrackedTarget bestTarget = result.getBestTarget();
       
-      // Update position data
+      // Actualiza datos de posición y ángulo
       Transform3d targetTransform = bestTarget.getBestCameraToTarget();
       xAxis = targetTransform.getX();
       yAxis = targetTransform.getY();
@@ -75,10 +81,10 @@ public class Vision extends SubsystemBase {
       tagId = bestTarget.getFiducialId();
       hasTarget = true;
       
-      // Log successful detection
+      // Log para debugging
       System.out.println("AprilTag detected - ID: " + tagId + ", Distance: " + xAxis + "m, Angle: " + zAngle + "°");
     } else {
-      // No targets found
+      // Si no hay targets, indica que no hay detección
       hasTarget = false;
       if (DriverStation.isEnabled()) {
         System.out.println("No AprilTags detected");
@@ -87,7 +93,7 @@ public class Vision extends SubsystemBase {
   }
   
   /**
-   * Display vision data on the SmartDashboard.
+   * Muestra los datos de visión en SmartDashboard para depuración y monitoreo.
    */
   private void displayDataOnDashboard() {
     SmartDashboard.putBoolean("Vision/Target Detected", hasTarget);
@@ -97,56 +103,34 @@ public class Vision extends SubsystemBase {
     SmartDashboard.putBoolean("Vision/Valid Tag", isValidTag());
   }
 
-  /**
-   * Check if the currently detected AprilTag is considered valid.
-   * 
-   * @return true if the current tag is valid, false otherwise
+  /** 
+   * Devuelve true si el tag detectado está en la lista de tags válidos. 
    */
   public boolean isValidTag() {
     return hasTarget && validTagIds.contains(tagId);
   }
   
-  /**
-   * Get the X-axis position relative to the target in meters.
-   * 
-   * @return X position in meters (positive = forward)
-   */
+  /** Devuelve la posición X relativa al tag en metros. */
   public double getXAxis() {
     return xAxis;
   }
   
-  /**
-   * Get the Y-axis position relative to the target in meters.
-   * 
-   * @return Y position in meters (positive = right)
-   */
+  /** Devuelve la posición Y relativa al tag en metros. */
   public double getYAxis() {
     return yAxis;
   }
   
-  /**
-   * Get the Z-axis rotation (yaw) relative to the target in degrees.
-   * 
-   * @return Z rotation in degrees (positive = clockwise)
-   */
+  /** Devuelve el ángulo yaw (Z) relativo al tag en grados. */
   public double getZAngle() {
     return zAngle;
   }
   
-  /**
-   * Get the ID of the currently tracked AprilTag.
-   * 
-   * @return AprilTag ID, or -1 if no tag is detected
-   */
+  /** Devuelve el ID del AprilTag actual, o -1 si no hay detección. */
   public int getIDApriltag() {
     return tagId;
   }
   
-  /**
-   * Check if the camera has a valid target.
-   * 
-   * @return true if a target is being tracked, false otherwise
-   */
+  /** Devuelve true si hay target detectado por la cámara. */
   public boolean hasTarget() {
     return hasTarget;
   }

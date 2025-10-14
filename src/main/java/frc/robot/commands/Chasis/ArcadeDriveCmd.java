@@ -10,17 +10,22 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Chasis;
 
 /**
- * Comando para conducción en modo arcade (velocidad + giro).
+ * COMANDO: ArcadeDriveCmd
+ * Permite controlar el chasis en modo "arcade" con velocidad y giro combinados.
+ * Se usa como default command para manejo en teleoperado.
+ * Parámetros:
+ * - speedFunction: Proveedor de velocidad lineal (-1 a 1).
+ * - turnFunction: Proveedor de velocidad angular (-1 a 1).
  */
 public class ArcadeDriveCmd extends Command {
   private final Chasis chasis;
   private final Supplier<Double> speedFunction, turnFunction;
   
   /**
-   * Crea un nuevo comando de conducción arcade.
+   * Constructor del comando de conducción arcade.
    * @param chasis Subsistema de chasis
    * @param speedFunction Proveedor de velocidad lineal (-1 a 1)
-   * @param turnFunction Proveedor de velocidad de giro (-1 a 1)
+   * @param turnFunction Proveedor de giro (-1 a 1)
    */
   public ArcadeDriveCmd(Chasis chasis, Supplier<Double> speedFunction, Supplier<Double> turnFunction) {
     this.chasis = chasis;
@@ -29,21 +34,26 @@ public class ArcadeDriveCmd extends Command {
     addRequirements(chasis);
   }
 
+  /** Inicializa y detiene motores al empezar el comando. */
   @Override
   public void initialize() {
     chasis.set_motors(0, 0);
   }
 
+  /** 
+   * Se ejecuta cada ciclo: calcula las velocidades en tiempo real
+   * y comanda los motores. Aplica zona muerta para evitar drift.
+   */
   @Override
   public void execute() {
     double realTimeSpeed = speedFunction.get();
     double realTimeTurn = turnFunction.get();
 
-    // Calcular potencias para cada lado
+    // Calcula potencias para cada lado (arcade)
     double left = realTimeSpeed + realTimeTurn;
     double right = realTimeSpeed - realTimeTurn;
     
-    // Eliminar drift del motor (zona muerta)
+    // Zona muerta para minimizar drift por errores menores
     if (Math.abs(left) < 0.06) {
       left = 0;
     }
@@ -54,13 +64,15 @@ public class ArcadeDriveCmd extends Command {
     chasis.set_motors(left, right);
   }
 
+  /** Detiene los motores al finalizar el comando (o ser interrumpido). */
   @Override
   public void end(boolean interrupted) {
-    chasis.set_motors(1.5, 1.5);
+    chasis.set_motors(0, 0);
   }
 
+  /** El comando nunca termina por sí mismo (default command). */
   @Override
   public boolean isFinished() {
-    return false; // Este comando se ejecuta hasta que sea interrumpido
+    return false;
   }
 }

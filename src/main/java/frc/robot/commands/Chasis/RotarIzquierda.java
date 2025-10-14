@@ -8,7 +8,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Chasis;
 
 /**
- * Comando para rotar el robot hacia la izquierda un ángulo específico.
+ * COMANDO: RotarIzquierda
+ * Permite que el robot gire sobre su eje hacia la izquierda una cantidad de grados especificada.
+ * Parámetros:
+ * - rightSpeed: Velocidad del lado derecho.
+ * - leftSpeed: Velocidad del lado izquierdo.
+ * - degrees: Grados a rotar.
+ * El comando termina cuando el encoder derecho alcanza la distancia de rotación calculada.
  */
 public class RotarIzquierda extends Command {
   private final Chasis chasis;
@@ -17,7 +23,7 @@ public class RotarIzquierda extends Command {
   private final double degrees;
   
   /**
-   * Crea un nuevo comando para rotar a la izquierda.
+   * Constructor del comando de giro a la izquierda.
    * @param chasis Subsistema de chasis
    * @param rightSpeed Velocidad del lado derecho
    * @param leftSpeed Velocidad del lado izquierdo
@@ -31,21 +37,25 @@ public class RotarIzquierda extends Command {
     addRequirements(chasis);
   }
 
+  /** Inicializa: resetea encoder al iniciar. */
   @Override
   public void initialize() {
     chasis.resetEncoder();
   }
 
+  /** Aplica velocidades para girar sobre eje. */
   @Override
   public void execute() {
     chasis.set_motors(leftSpeed, rightSpeed);
   }
 
+  /** Detiene motores al terminar o ser interrumpido. */
   @Override
   public void end(boolean interrupted) {
     chasis.set_motors(0, 0);
   }
 
+  /** Termina cuando el encoder derecho alcanza la distancia de rotación calculada. */
   @Override
   public boolean isFinished() {
     double currentDistance = chasis.get_right_encoder_distance();

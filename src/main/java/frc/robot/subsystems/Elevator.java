@@ -12,13 +12,27 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * SUBSISTEMA: ELEVADOR
+ * Controla el motor Falcon para subir/bajar el elevador usando setpoint, velocidad directa y lectura de posición.
+ * Métodos clave:
+ * - set_speed: Control directo (-1 a 1).
+ * - getCurrentPosition: Lectura de posición en rotaciones.
+ * - reset_encoders: Reinicia el encoder del Falcon.
+ * - ElevatorGoPosition: Control de posición cerrada usando voltaje (Phoenix6).
+ * - periodic: Actualiza datos en SmartDashboard y permite reset manual desde dashboard.
+ */
 public class Elevator extends SubsystemBase {
   private final TalonFX elevatorFalcon = new TalonFX(2); // Falcon con ID 2
 
+  // Parámetros PID (ajusta para tu sistema)
   private double kP = 0.1;
   private double kI = 0;
   private double kD = 0;
 
+  /**
+   * Constructor: configura el Falcon, PID e inversion.
+   */
   public Elevator() {
     TalonFXConfiguration config = new TalonFXConfiguration();
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -33,35 +47,48 @@ public class Elevator extends SubsystemBase {
 
     elevatorFalcon.getConfigurator().apply(config);
 
-    // Botón de reset encoder en Dashboard
+    // Botón de reset encoder en Dashboard (toggle)
     SmartDashboard.putBoolean("Elevator/Reset Encoder", false);
   }
 
+  /**
+   * Control directo de velocidad (-1 a 1).
+   */
   public void set_speed(double speed) {
     elevatorFalcon.set(speed);
   }
 
+  /**
+   * Devuelve la posición actual del Falcon en rotaciones (Phoenix6).
+   */
   public double getCurrentPosition() {
-    // Phoenix6: getPosition() retorna Angle, usa getValueAsDouble() (rotaciones)
     return elevatorFalcon.getPosition().getValueAsDouble();
   }
 
+  /** Resetea el encoder del Falcon a cero. */
   public void reset_encoders() {
     elevatorFalcon.setPosition(0);
   }
 
+  /**
+   * Control de posición cerrada usando voltaje.
+   * @param targetRotations Número de rotaciones objetivo.
+   */
   public void ElevatorGoPosition(double targetRotations) {
     elevatorFalcon.setControl(new PositionVoltage(targetRotations));
   }
 
+  /**
+   * Llamado periódicamente: publica posición en Dashboard, permite reset manual desde interfaz.
+   */
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Elevator/Falcon Position", getCurrentPosition());
 
-    // Botón para resetear el encoder desde el dashboard
+    // Si el usuario pulsa el botón virtual, resetea encoder
     if (SmartDashboard.getBoolean("Elevator/Reset Encoder", false)) {
       reset_encoders();
-      SmartDashboard.putBoolean("Elevator/Reset Encoder", false); // Para que sea pulsador
+      SmartDashboard.putBoolean("Elevator/Reset Encoder", false); // Reinicia el pulsador
     }
   }
 }

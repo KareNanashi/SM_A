@@ -8,7 +8,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Chasis;
 
 /**
- * Comando para conducir en línea recta una distancia específica.
+ * COMANDO: Drive
+ * Permite que el robot avance en línea recta una distancia específica.
+ * Parámetros:
+ * - targetDistance: Distancia objetivo en metros.
+ * - speed: Velocidad constante a aplicar (-1 a 1).
+ * El comando termina cuando la distancia recorrida >= objetivo.
  */
 public class Drive extends Command {
   private final Chasis chasis;
@@ -16,7 +21,7 @@ public class Drive extends Command {
   private final double speed;
   
   /**
-   * Crea un nuevo comando para conducir en línea recta.
+   * Constructor del comando de avance recto.
    * @param chasis Subsistema de chasis
    * @param targetDistance Distancia objetivo en metros
    * @param speed Velocidad a utilizar (-1 a 1)
@@ -28,21 +33,25 @@ public class Drive extends Command {
     addRequirements(chasis);
   }
 
+  /** Inicializa: resetea encoders al iniciar. */
   @Override
   public void initialize() {
     chasis.resetEncoder();
   }
 
+  /** Comanda avance recto a velocidad constante. */
   @Override
   public void execute() {
     chasis.set_motors(speed, speed);
   }
 
+  /** Detiene motores al terminar o ser interrumpido. */
   @Override
   public void end(boolean interrupted) {
     chasis.set_motors(0, 0);
   }
 
+  /** Termina cuando el robot ha recorrido la distancia objetivo. */
   @Override
   public boolean isFinished() {
     return chasis.getAverageEncoderDistance() >= targetDistance;
