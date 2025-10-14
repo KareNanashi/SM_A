@@ -44,13 +44,15 @@ public class ElevatorCmd extends Command {
 
   /**
    * Ejecuta movimiento, pero lo detiene si el limit switch correspondiente está activado.
+   * Cambiado: ahora el Falcon se detiene SOLO cuando el switch está ACTIVADO (imán cerca).
+   * Si el switch está desactivado (imán lejos), el Falcon puede moverse.
    */
   @Override
   public void execute() {
-    if (speed < 0 && downLimitSwitch.get()) {
+    if (speed < 0 && !downLimitSwitch.get()) {
       elevator.set_speed(0);
     }
-    else if (speed > 0 && upLimitSwitch.get()) {
+    else if (speed > 0 && !upLimitSwitch.get()) {
       elevator.set_speed(0);
     }
     else {
