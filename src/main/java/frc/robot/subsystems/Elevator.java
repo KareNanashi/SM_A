@@ -21,7 +21,7 @@ public class Elevator extends SubsystemBase {
 
   public Elevator() {
     TalonFXConfiguration config = new TalonFXConfiguration();
-    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // Cambia si tu motor está al revés
+    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     config.Slot0.kP = kP;
     config.Slot0.kI = kI;
     config.Slot0.kD = kD;

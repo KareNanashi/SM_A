@@ -58,24 +58,15 @@ public class RobotContainer {
   private final SlewRateLimiter filter = new SlewRateLimiter(0.5);
   
   // Constants
-  private static final double ELEVATOR_RAISED_THRESHOLD = 100; // Ajusta este valor según tus mediciones
-  private static final double SLOW_FACTOR = 0.5; // Factor para reducir la velocidad cuando el elevador está elevado
+  private static final double ELEVATOR_RAISED_THRESHOLD = 100; // Velocity in base mesurements
+  private static final double SLOW_FACTOR = 0.5; // Slow factor meanwhile elevator is elevated
   
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    // Configure the button bindings
-    configureBindings();
-    
-    // Configure default commands
-    configureDefaultCommands();
-    
-    // Configure autonomous options
-    configureAutonomousOptions();
     
     // Add CommandScheduler to SmartDashboard
-    SmartDashboard.putData(CommandScheduler.getInstance());
   }
   
   /**
@@ -115,50 +106,20 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Mode", mChooser);
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
   private void configureBindings() {
     // Controller 1 - Driver
-    configureDriverControls();
-    
-    // Controller 2 - Operator
-    configureOperatorControls();
-  }
+      // Add vision alignment button - change to continuous following for testing
+      new JoystickButton(control_1, 3)
+          .whileTrue(new AlignToAprilTagCommand(vision, chasis));
   
-  /**
-   * Configure the controls for the driver (controller 1).
-   */
-  private void configureDriverControls() {
-    // Add vision alignment button - change to continuous following for testing
-    new JoystickButton(control_1, 3)
-        .whileTrue(new AlignToAprilTagCommand(vision, chasis));
-
-    new JoystickButton(control_1, 1)
-        .whileTrue(new ElevatorCmd(elevator, 0.75, downlimitswitch, uplimitswitch)); // Subir
-
-    new JoystickButton(control_1, 2)
-        .whileTrue(new ElevatorCmd(elevator, -0.75, downlimitswitch, uplimitswitch)); // Bajar
-    
-    new JoystickButton(control_1, 5).onTrue(new ResetEncoders(elevator));    
-  }
+      new JoystickButton(control_1, 1)
+          .whileTrue(new ElevatorCmd(elevator, 0.75, downlimitswitch, uplimitswitch)); // Subir
   
-  /**
-   * Configure the controls for the operator (controller 2).
-   */
-  private void configureOperatorControls() {
-    
-
-    // Instancia del subsistema y control
-   
-
-
-    
-       
-     }
+      new JoystickButton(control_1, 2)
+          .whileTrue(new ElevatorCmd(elevator, -0.75, downlimitswitch, uplimitswitch)); // Bajar
+      
+      new JoystickButton(control_1, 5).onTrue(new ResetEncoders(elevator));    
+    }
   
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

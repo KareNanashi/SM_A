@@ -30,10 +30,10 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
     
-    // Iniciar cámara para streaming en el dashboard
+    // Inicialisate Camera
     CameraServer.startAutomaticCapture();
     
-    // Añadir tab de visión en Shuffleboard para monitoreo
+    // Camera un Shuffleboard
     Shuffleboard.getTab("Vision");
   }
 
