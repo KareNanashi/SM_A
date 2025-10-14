@@ -1,91 +1,63 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
-
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Elevator extends SubsystemBase {
-  /** Creates a new Elevator. */
-  private final SparkMax elevator_1 = new SparkMax(4, MotorType.kBrushless);
-  private final SparkMaxConfig elev1config = new SparkMaxConfig();
-  private final SparkClosedLoopController elevatorPID1 = elevator_1.getClosedLoopController();
-  private final RelativeEncoder elevator_encoder_1;
+  private final TalonFX elevatorFalcon = new TalonFX(2); // Falcon con ID 2
 
-  // Constantes del sistema
-  // private static final double GEAR_RATIO = 125; // 3 etapas de 5:1 (5*5*5 = 125)
-  // private static final double SPROCKET_CIRCUMFERENCE = (0.05 * Math.PI); // Circunferencia del sprocket en metros
-  // private static final double METERS_TO_ROTATIONS = GEAR_RATIO / SPROCKET_CIRCUMFERENCE;
-
-  // Constantes del PID
   private double kP = 0.1;
   private double kI = 0;
   private double kD = 0;
 
-  // Controlador PID perfilado
-
-
   public Elevator() {
-    // Configuración del motor
-    elev1config.smartCurrentLimit(40).idleMode(IdleMode.kBrake).inverted(false);
-    elev1config.encoder.positionConversionFactor(1).velocityConversionFactor(1);
-    elev1config.closedLoop.pid(kP, kI, kD).outputRange(-0.75, 0.75);
-    elevator_1.configure(elev1config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    TalonFXConfiguration config = new TalonFXConfiguration();
+    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // Cambia si tu motor está al revés
+    config.Slot0.kP = kP;
+    config.Slot0.kI = kI;
+    config.Slot0.kD = kD;
+    config.Voltage.PeakForwardVoltage = 12;
+    config.Voltage.PeakReverseVoltage = -12;
+    config.CurrentLimits = new CurrentLimitsConfigs()
+      .withStatorCurrentLimit(40.0)
+      .withStatorCurrentLimitEnable(true);
 
-    // Obtener el encoder
-    elevator_encoder_1 = elevator_1.getEncoder();
+    elevatorFalcon.getConfigurator().apply(config);
 
-    
+    // Botón de reset encoder en Dashboard
+    SmartDashboard.putBoolean("Elevator/Reset Encoder", false);
   }
 
-  // Método para establecer la posición del elevador en metros
-  // public void set_position(double targetPositionMetros) {
-  //   double targetPositionRotations = targetPositionMetros * METERS_TO_ROTATIONS;
-  //   elevatorPID1.setReference(targetPositionRotations, SparkMax.ControlType.kPosition);
-  // }
-
-  // Método para establecer la velocidad del elevador
   public void set_speed(double speed) {
-    elevator_1.set(-speed);
+    elevatorFalcon.set(speed);
   }
 
-  // Método para obtener la posición actual del elevador en metros
   public double getCurrentPosition() {
-    return elevator_encoder_1.getPosition();
+    // Phoenix6: getPosition() retorna Angle, usa getValueAsDouble() (rotaciones)
+    return elevatorFalcon.getPosition().getValueAsDouble();
   }
 
-  // Método para mostrar la posición del encoder en SmartDashboard
-  public void position_encoders() {
-    SmartDashboard.putNumber("Elevator1", elevator_encoder_1.getPosition());
+  public void reset_encoders() {
+    elevatorFalcon.setPosition(0);
   }
 
-  public void reset_encoders(){
-    elevator_encoder_1.setPosition(0);
+  public void ElevatorGoPosition(double targetRotations) {
+    elevatorFalcon.setControl(new PositionVoltage(targetRotations));
   }
-
-  public void ElevatorGoPosition(double target){
-    elevatorPID1.setReference(target, ControlType.kPosition);
-  }
-
 
   @Override
   public void periodic() {
-    // Mostrar la posición del elevador en SmartDashboard
-    SmartDashboard.putNumber("Elevator Position (m)", getCurrentPosition());
+    SmartDashboard.putNumber("Elevator/Falcon Position", getCurrentPosition());
 
-    position_encoders();
+    // Botón para resetear el encoder desde el dashboard
+    if (SmartDashboard.getBoolean("Elevator/Reset Encoder", false)) {
+      reset_encoders();
+      SmartDashboard.putBoolean("Elevator/Reset Encoder", false); // Para que sea pulsador
+    }
   }
 }

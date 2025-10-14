@@ -4,27 +4,20 @@
 
 package frc.robot;
 
-import frc.robot.commands.Autonomo.AlignToAprilTagCommand;
+import frc.robot.commands.Elevador.ResetEncoders;
+import frc.robot.commands.Chasis.AlignToAprilTagCommand;
 import frc.robot.commands.Chasis.ArcadeDriveCmd;
 import frc.robot.commands.Chasis.Drive;
 import frc.robot.commands.Chasis.RotarDerecha;
 import frc.robot.commands.Chasis.RotarIzquierda;
 import frc.robot.commands.Elevador.ElevatorCmd;
-import frc.robot.commands.Elevador.ElevatorIntakeSequence;
-import frc.robot.commands.Elevador.MoveElevatorToPosition;
-import frc.robot.commands.Elevador.ResetEncoders;
-import frc.robot.commands.Garra.GarraCmd;
-import frc.robot.commands.Intake.IntakeCmd;
-import frc.robot.commands.Intake.IntakeResetEncoders;
-import frc.robot.commands.Intake.IntakeSetPositionCmd;
 import frc.robot.subsystems.Chasis;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Garra;
-import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Vision;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -47,11 +40,9 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Chasis chasis = new Chasis();
   private final Elevator elevator = new Elevator();
-  private final Garra garra = new Garra();
-  private final Intake intake = new Intake();
   private final Vision vision = new Vision();
-  private final XboxController control_1 = new XboxController(0);
-  private final XboxController control_2 = new XboxController(1);
+  private final XboxController control_1 = new XboxController(1);
+  private final XboxController control_2 = new XboxController(0);
   
   // Limit switches
   private final DigitalInput downlimitswitch = new DigitalInput(0);
@@ -110,7 +101,7 @@ public class RobotContainer {
       }
     ));
     
-    intake.setDefaultCommand(new IntakeCmd(intake, () -> (-control_2.getRawAxis(1)*0.4)));
+    
   }
   
   /**
@@ -142,49 +133,34 @@ public class RobotContainer {
    * Configure the controls for the driver (controller 1).
    */
   private void configureDriverControls() {
-    // Elevator control
-    new JoystickButton(control_1, 1)
-        .whileTrue(new ElevatorCmd(elevator, 0.75)
-        .unless(() -> downlimitswitch.get() == false));
-    
-    new JoystickButton(control_1, 2)
-        .whileTrue(new ElevatorCmd(elevator, -0.75)
-        .unless(() -> uplimitswitch.get() == false));
-    
     // Add vision alignment button - change to continuous following for testing
     new JoystickButton(control_1, 3)
         .whileTrue(new AlignToAprilTagCommand(vision, chasis));
+
+        new JoystickButton(control_1, 1)
+        .whileTrue(new ElevatorCmd(elevator, 0.75)); // Subir
+    
+    new JoystickButton(control_1, 2)
+        .whileTrue(new ElevatorCmd(elevator,-0.75)); // Bajar
+    
+        new JoystickButton(control_1, 5).onTrue(new ResetEncoders(elevator));    
+    
+    SmartDashboard.putBoolean("Elevator/Reset Encoder", false); // Botón en dashboard
   }
   
   /**
    * Configure the controls for the operator (controller 2).
    */
   private void configureOperatorControls() {
-    // Garra controls
-    new JoystickButton(control_2, 5)
-        .whileTrue(new GarraCmd(garra, -0.5, -0.6))
-        .whileFalse(new GarraCmd(garra, 0, 0));
     
-    new JoystickButton(control_2, 6)
-        .whileTrue(new GarraCmd(garra, 0.5, 0.6))
-        .whileFalse(new GarraCmd(garra, 0, 0));
+
+    // Instancia del subsistema y control
+   
+
+
     
-    // Elevator position presets
-    new Trigger(() -> control_2.getRawButton(3))
-        .onTrue(new MoveElevatorToPosition(elevator, 260));
-    
-    new Trigger(() -> control_2.getRawButton(2))
-        .onTrue(new MoveElevatorToPosition(elevator, 0));
-    
-    new Trigger(() -> control_2.getRawButton(1))
-        .onTrue(new MoveElevatorToPosition(elevator, 110));
-    
-    new Trigger(() -> control_2.getRawButton(4))
-        .onTrue(new MoveElevatorToPosition(elevator, 331));
-    
-    // Reset encoders
-    new JoystickButton(control_2, 10).onTrue(new ResetEncoders(elevator));
-  }
+       
+     }
   
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
