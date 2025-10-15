@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import frc.robot.commands.Garra.IntakeCmd;
+import frc.robot.commands.Garra.MunecaCmd;
+import frc.robot.subsystems.Muneca;
 import frc.robot.commands.Elevador.ResetEncoders;
 import frc.robot.commands.Chasis.AlignToAprilTagCommand;
 import frc.robot.commands.Chasis.ArcadeDriveCmd;
@@ -13,8 +16,8 @@ import frc.robot.commands.Chasis.RotarIzquierda;
 import frc.robot.commands.Elevador.ElevatorCmd;
 import frc.robot.subsystems.Chasis;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Vision;
-
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -57,7 +60,7 @@ public class RobotContainer {
 
   // Comando autónomo principal: seguir AprilTag
   private final Command AlignToAprilTagCommand = new AlignToAprilTagCommand(vision, chasis);
-
+  private final Intake intake = new Intake();
   // Selector de comandos para autónomo
   private final SendableChooser<Command> mChooser = new SendableChooser<>();
 
@@ -67,7 +70,7 @@ public class RobotContainer {
   // Constantes de operación
   private static final double ELEVATOR_RAISED_THRESHOLD = 100; // Umbral de altura de elevador
   private static final double SLOW_FACTOR = 0.5; // Reducción de velocidad si elevador está arriba
-
+  private final Muneca muneca = new Muneca();
   /**
    * Constructor: inicializa la estructura del robot.
    * IMPORTANTE: Se deben llamar los métodos de configuración aquí.
@@ -90,18 +93,22 @@ public class RobotContainer {
         double speed = -control_1.getRawAxis(1);        
         // Si el elevador está por encima del umbral, reduce la velocidad
         if (elevator.getCurrentPosition() > ELEVATOR_RAISED_THRESHOLD) {
-          speed *= SLOW_FACTOR;
+          speed *= SLOW_FACTOR; 
         }
         return filter.calculate(speed);
       },
       () -> {
-        double turn = control_1.getRawAxis(4);
+        double turn = control_1.getRawAxis(2);
         if (elevator.getCurrentPosition() > ELEVATOR_RAISED_THRESHOLD) {
           turn *= SLOW_FACTOR;
         }
         return turn*0.4;
       }
     ));
+muneca.setDefaultCommand(new MunecaCmd(
+  muneca,
+  () -> control_1.getRawAxis(3) * 0.5 // Ajusta el 0.5 para la velocidad máxima deseada
+));
   }
 
   /**
@@ -131,7 +138,13 @@ public class RobotContainer {
     new JoystickButton(control_1, 2)
         .whileTrue(new ElevatorCmd(elevator, -0.75, downlimitswitch, uplimitswitch)); // Bajar
     
-    new JoystickButton(control_1, 5).onTrue(new ResetEncoders(elevator));    
+    new JoystickButton(control_1, 4).onTrue(new ResetEncoders(elevator));    
+    
+    new JoystickButton(control_1, 6)
+    .whileTrue(new IntakeCmd(intake, 0.8)); // Succionar
+
+    new JoystickButton(control_1, 5)
+    .whileTrue(new IntakeCmd(intake, -0.8)); // Escupir (expulsar)
   }
 
   /**

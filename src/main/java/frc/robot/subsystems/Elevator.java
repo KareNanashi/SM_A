@@ -9,6 +9,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -30,6 +31,9 @@ public class Elevator extends SubsystemBase {
   private double kI = 0;
   private double kD = 0;
 
+  // Última posición registrada para mantener con PID
+  private double holdPosition = 0;
+
   /**
    * Constructor: configura el Falcon, PID e inversion.
    */
@@ -47,6 +51,9 @@ public class Elevator extends SubsystemBase {
 
     elevatorFalcon.getConfigurator().apply(config);
 
+    // Activa modo freno (brake)
+    elevatorFalcon.setNeutralMode(NeutralModeValue.Brake);
+
     // Botón de reset encoder en Dashboard (toggle)
     SmartDashboard.putBoolean("Elevator/Reset Encoder", false);
   }
@@ -55,7 +62,14 @@ public class Elevator extends SubsystemBase {
    * Control directo de velocidad (-1 a 1).
    */
   public void set_speed(double speed) {
-    elevatorFalcon.set(speed);
+    if (speed == 0) {
+      // Mantener posición actual usando PID si no hay comando de velocidad
+      holdPosition = getCurrentPosition();
+      ElevatorGoPosition(holdPosition);
+    } else {
+      elevatorFalcon.set(speed);
+      holdPosition = getCurrentPosition();
+    }
   }
 
   /**
@@ -68,6 +82,7 @@ public class Elevator extends SubsystemBase {
   /** Resetea el encoder del Falcon a cero. */
   public void reset_encoders() {
     elevatorFalcon.setPosition(0);
+    holdPosition = 0;
   }
 
   /**
