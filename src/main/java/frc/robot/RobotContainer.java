@@ -107,7 +107,7 @@ public class RobotContainer {
     ));
 muneca.setDefaultCommand(new MunecaCmd(
   muneca,
-  () -> control_1.getRawAxis(3) * 0.5 // Ajusta el 0.5 para la velocidad máxima deseada
+  () -> control_1.getRawAxis(5) * 0.5 // Ajusta el 0.5 para la velocidad máxima deseada
 ));
   }
 
