@@ -40,7 +40,7 @@ public class Muneca extends SubsystemBase {
 
   public Muneca() {
     // Configuración: modo brake, límite de corriente
-    munecaConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40);
+    munecaConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).inverted(true);
     munecaConfig.closedLoop.pid(kP, kI, kD).outputRange(-0.5, 0.5);
     munecaMotor.configure(munecaConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 

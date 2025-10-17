@@ -19,18 +19,12 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Vision;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 
 /**
@@ -52,7 +46,7 @@ public class RobotContainer {
 
   // Controles (Xbox Controllers)
   private final XboxController control_1 = new XboxController(1);
-  private final XboxController control_2 = new XboxController(0);
+  private final XboxController control_2 = new XboxController(2);
 
   // Limit switches para el elevador
   private final DigitalInput downlimitswitch = new DigitalInput(0);
@@ -77,7 +71,7 @@ public class RobotContainer {
    */
   public RobotContainer() {
     configureDefaultCommands();
-    configureAutonomousOptions();
+  
     configureBindings();
     // Puedes agregar aquí otros inicializadores si tienes subsistemas extra.
   }
@@ -105,34 +99,33 @@ public class RobotContainer {
         return turn*0.4;
       }
     ));
-muneca.setDefaultCommand(new MunecaCmd(
-  muneca,
-  () -> control_1.getRawAxis(5) * 0.5 // Ajusta el 0.5 para la velocidad máxima deseada
-));
+
+    muneca.setDefaultCommand(new MunecaCmd(
+      muneca,
+      () -> control_2.getRawAxis(1) * 0.5 // Ajusta el 0.5 para la velocidad máxima deseada
+    ));
   }
 
   /**
    * Configura las opciones disponibles para el modo autónomo.
-   * Actualmente, sólo hay una opción: seguir el AprilTag.
+   * Añade la opción de la secuencia completa además del seguimiento de AprilTag.
    */
-  private void configureAutonomousOptions() {
-    mChooser.setDefaultOption("AprilTag Following", AlignToAprilTagCommand);
-    SmartDashboard.putData("Auto Mode", mChooser);
-  }
+
+  
 
   /**
    * Configura los bindings entre botones físicos y comandos.
    * - Botón 3: alineación continua con AprilTag.
    * - Botón 1: subir elevador (mientras se mantenga presionado).
    * - Botón 2: bajar elevador (mientras se mantenga presionado).
-   * - Botón 5: reset encoder del elevador.
+   * - Botón 4: reset encoder del elevador.
    */
   private void configureBindings() {
     // Controlador 1 - Driver
-    new JoystickButton(control_1, 2)
+    new JoystickButton(control_1, 3)
         .whileTrue(new AlignToAprilTagCommand(vision, chasis));
 
-    new JoystickButton(control_1, 3)
+    new JoystickButton(control_1, 1)
         .whileTrue(new ElevatorCmd(elevator, 0.75, downlimitswitch, uplimitswitch)); // Subir
 
     new JoystickButton(control_1, 2)
@@ -140,15 +133,15 @@ muneca.setDefaultCommand(new MunecaCmd(
     
     new JoystickButton(control_1, 4).onTrue(new ResetEncoders(elevator));    
     
-    new JoystickButton(control_1, 6)
-    .whileTrue(new IntakeCmd(intake, 0.8)); // Succionar
+    new JoystickButton(control_2, 5)
+      .whileTrue(new IntakeCmd(intake, 0.8)); // Succionar
 
-    new JoystickButton(control_1, 5)
-    .whileTrue(new IntakeCmd(intake, -0.8)); // Escupir (expulsar)
+    new JoystickButton(control_2, 6)
+      .whileTrue(new IntakeCmd(intake, -0.8)); // Escupir (expulsar)
   }
 
   /**
-   * Devuelve el comkkando autónomo seleccionado para ser ejecutado por el robot.
+   * Devuelve el comando autónomo seleccionado para ser ejecutado por el robot.
    */
   public Command getAutonomousCommand() {
     return mChooser.getSelected();
