@@ -98,7 +98,7 @@ public class RobotContainer {
         return filter.calculate(speed);
       },
       () -> {
-        double turn = control_1.getRawAxis(2);
+        double turn = control_1.getRawAxis(4);
         if (elevator.getCurrentPosition() > ELEVATOR_RAISED_THRESHOLD) {
           turn *= SLOW_FACTOR;
         }
@@ -129,10 +129,10 @@ muneca.setDefaultCommand(new MunecaCmd(
    */
   private void configureBindings() {
     // Controlador 1 - Driver
-    new JoystickButton(control_1, 3)
+    new JoystickButton(control_1, 2)
         .whileTrue(new AlignToAprilTagCommand(vision, chasis));
 
-    new JoystickButton(control_1, 1)
+    new JoystickButton(control_1, 3)
         .whileTrue(new ElevatorCmd(elevator, 0.75, downlimitswitch, uplimitswitch)); // Subir
 
     new JoystickButton(control_1, 2)
