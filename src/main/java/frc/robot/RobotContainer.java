@@ -80,15 +80,15 @@ public class RobotContainer {
     chasis.setDefaultCommand(new ArcadeDriveCmd(
       chasis,
       () -> {
-        double speed = -control_1.getRawAxis(1);        
+        double speed = -control_1.getRawAxis(1)*0.5;        
         // Si el elevador está por encima del umbral, reduce la velocidad
         if (elevator.getCurrentPosition() > ELEVATOR_RAISED_THRESHOLD) {
           speed *= SLOW_FACTOR; 
         }
-        return filter.calculate(speed);
+        return speed;
       },
       () -> {
-        double turn = control_1.getRawAxis(4);
+        double turn = control_1.getRawAxis(4)*0.5;
         if (elevator.getCurrentPosition() > ELEVATOR_RAISED_THRESHOLD) {
           turn *= SLOW_FACTOR;
         }
@@ -98,7 +98,7 @@ public class RobotContainer {
 
     muneca.setDefaultCommand(new MunecaCmd(
       muneca,
-      () -> control_2.getRawAxis(1) * 0.5 // Ajusta el 0.5 para la velocidad máxima deseada
+      () -> control_2.getRawAxis(1) * 0.2 // Ajusta el 0.5 para la velocidad máxima deseada
     ));
   }
 
@@ -108,10 +108,8 @@ public class RobotContainer {
    */
   private void configureAutonomousOptions() {
     // Comandos de ejemplo para autónomo
-    Command autoAdvance = new AutonomoAvanzar(chasis, 2.0, 0.5); // Avanza 2 metros al 50%
-    Command drive1m = new Drive(chasis, 2.0, 0.5); // Avanza 1 metro al 50%
-   
-
+    Command autoAdvance = new AutonomoAvanzar(chasis, 0.5, 0.4); // Avanza 2 metros al 50%
+    
     // Registrar opciones en el chooser
     mChooser.setDefaultOption("Avanzar 2m (AutonomoAvanzar)", autoAdvance);
   
