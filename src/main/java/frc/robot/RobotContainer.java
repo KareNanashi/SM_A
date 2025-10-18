@@ -56,7 +56,7 @@ public class RobotContainer {
   private final SendableChooser<Command> mChooser = new SendableChooser<>();
 
   // SlewRateLimiter para suavizar aceleraciones del chasis
-  private final SlewRateLimiter filter = new SlewRateLimiter(0.5);
+  private final SlewRateLimiter filter = new SlewRateLimiter(0.2);
 
   // Constantes de operación
   private static final double ELEVATOR_RAISED_THRESHOLD = 100; // Umbral de altura de elevador
@@ -109,14 +109,12 @@ public class RobotContainer {
   private void configureAutonomousOptions() {
     // Comandos de ejemplo para autónomo
     Command autoAdvance = new AutonomoAvanzar(chasis, 2.0, 0.5); // Avanza 2 metros al 50%
-    Command drive1m = new Drive(chasis, 1.0, 0.5); // Avanza 1 metro al 50%
-    Command followTag = alignToAprilTagCmd; // Seguir/alinearse a AprilTag (no termina por sí solo)
+    Command drive1m = new Drive(chasis, 2.0, 0.5); // Avanza 1 metro al 50%
+   
 
     // Registrar opciones en el chooser
     mChooser.setDefaultOption("Avanzar 2m (AutonomoAvanzar)", autoAdvance);
-    mChooser.addOption("Avanzar 1m (Drive)", drive1m);
-    mChooser.addOption("Seguir/Alinear AprilTag", followTag);
-
+  
     // Publicar en SmartDashboard para selección desde el driver station
     SmartDashboard.putData("Autonomous Mode", mChooser);
   }
