@@ -108,7 +108,7 @@ public class RobotContainer {
    */
   private void configureAutonomousOptions() {
     // Comandos de ejemplo para autónomo
-    Command autoAdvance = new AutonomoAvanzar(chasis, 0.5, 0.4); // Avanza 2 metros al 50%
+    Command autoAdvance = new AutonomoAvanzar(chasis, 1.5, 0.3); // Avanza 2 metros al 50%
     
     // Registrar opciones en el chooser
     mChooser.setDefaultOption("Avanzar 2m (AutonomoAvanzar)", autoAdvance);
